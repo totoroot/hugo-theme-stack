@@ -1,0 +1,30 @@
+{{ if .IsNamedParams }}
+
+{{ $mapLat := default "" (.Get "mapLat") }}
+{{ $mapLon := default "" (.Get "mapLon") }}
+{{ $zoom := default "13" (.Get "zoom") }}
+{{ $mapWidth := default "100%" (.Get "mapWidth") }}
+{{ $mapHeight := default "400px" (.Get "mapHeight") }}
+{{ $mapId := default (md5 (printf "%s%s" $mapLat $mapLon)) (.Get "mapId") }}
+{{ $scrollWheelZoom := default "true" (.Get "scrollWheelZoom") }}
+
+<!--Container-->
+<div id='mapid_{{ $mapId }}' class="leaflet-map" style='width: {{ $mapWidth }}; height: {{ $mapHeight}};'></div>
+
+<script>
+    //Create Map
+    leafletMapsObj[{{ $mapId }}] = L.map('mapid_{{ $mapId }}').setView([{{ $mapLat }}, {{ $mapLon }}], {{ $zoom }});
+    {{ if eq $scrollWheelZoom "false" }}
+        leafletMapsObj[{{ $mapId }}].scrollWheelZoom.disable();
+    {{ end }}
+    //Add tiles
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'
+    }).addTo(leafletMapsObj[{{ $mapId }}]);
+
+</script>
+{{.Inner}}
+
+{{ else }}
+{{ errorf "Leaflet Hugo Shortcode: please provide named Parameters" }}
+{{ end }}
